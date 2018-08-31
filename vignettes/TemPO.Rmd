@@ -1,0 +1,267 @@
+---
+title: "Tidy Meta Profiles using Bioconductor and the Tidyverse"
+author: "Malte Thodberg"
+package: TeMPO
+abstract: >
+  The TeMPO R/Bioconductor package provides fast and easy to use functions for generating _meta profiles_ (also known as _meta genes_, _average profiles_ or _average footprints_) over one or more sets of genomic locations and signals. TeMPO uses highly efficient, but difficult to use Bioconductor S4-classes to calculcate summaries, but outputs results as ordinary data.frames or tibbles for easy and flexible plotting with the popular ggplot2 package. TeMPO thereby provides the glue for working with Bioconductor-objects in the tidyverse. Additional meta-profile functionalites such as stranded meta-profiles, outlier-trimming and alternative summary functions are available for advanced users.
+output: 
+    BiocStyle::html_document
+vignette: >
+    %\VignetteIndexEntry{Vignette Title}
+    %\VignetteEngine{knitr::rmarkdown}
+    %\VignetteEncoding{UTF-8}  
+---
+
+# Installation
+
+TBA
+
+# Citation
+
+TBA
+
+# Getting help and contact
+
+TBA
+
+# Quick start
+
+TBA
+
+# Introduction
+
+## Meta profiles
+
+TBA
+
+## Bioconductor vs the Tidyverse
+
+TBA
+
+# Usage examples
+
+## Needed inputs
+
+- A set of sites as a GRanges
+- A set of genome-wide signals as a BigWigFile or RleList
+
+## Example data set
+
+Subsets of data for hela cells (hg19) chromosomes 20-22:
+
+- CAGE data from "Nuclear stability and transcriptional directionality separate functionally distinct RNA species" by Andersson et al.
+- ChIP-Seq and DNase-Seq data from The Roadmap Epigenomics Project.
+
+Load the needed packages:
+
+```{r, message=F, warning=F}
+library(TeMPO)
+library(tidyverse)
+
+theme_set(theme_light())
+```
+
+Load the examples data
+```{r}
+# Sites
+data("CAGE_clusters")
+
+# Unstraded genome-wide signals as BigWigFiles
+ChIP_Seq <- system.file("extdata", package = "TeMPO") %>%
+    list.files(full.names=TRUE) %>%
+    BigWigFileList()
+
+names(ChIP_Seq) <- c("DNase", "H3K27ac", "H3K4me1", "H3K4me3")
+
+# Stranded genome-wide signals as RleList
+data("CAGE_plus")
+data("CAGE_minus")
+```
+
+## Single set of sites & single genome-wide signal
+
+Simple example of DNAse-signal around promoters:
+```{r}
+promoters_only <- subset(CAGE_clusters, txType == "promoter")
+
+SS1 <- tidyMetaProfile(sites = promoters_only, 
+                      forward=ChIP_Seq$DNase, reverse=NULL,
+                      upstream=1000, downstream=1000)
+
+ggplot(SS1, aes(x=pos0, y=sense)) + 
+    geom_line(alpha=0.75) +
+    geom_vline(xintercept=0, alpha=0.75, linetype="dotted") +
+    labs(x="Basepair position relative to center",
+         y="Average DNase signal")
+```
+
+Classic example of bidirectional transcription of eRNAs at enhancers:
+```{r}
+enhancers_only <- subset(CAGE_clusters, clusterType == "enhancer")
+
+SS2 <- tidyMetaProfile(sites = enhancers_only, 
+                      forward=CAGE_plus$WT, reverse=CAGE_minus$WT,
+                      upstream=300, downstream=300)
+
+SS2 %>%
+    gather(key="direction", value="score", sense, anti, factor_key=TRUE) %>%
+    ggplot(aes(x=pos0, y=score, color=direction)) + 
+    scale_color_brewer("Direction", palette="Set1") +
+    geom_line(alpha=0.75) +
+    geom_vline(xintercept=0, alpha=0.75, linetype="dotted") +
+    labs(x="Basepair position relative to center",
+         y="Average CAGE signal")
+```
+
+## Single set of sites & multiple genome-wide signal
+
+```{r}
+SM <- tidyMetaProfile(sites = promoters_only, 
+                      forward=ChIP_Seq, reverse=NULL,
+                      upstream=1000, downstream=1000)
+
+ggplot(SM, aes(x=pos0, y=sense, color=signal)) + 
+    geom_line(alpha=0.75) +
+    geom_vline(xintercept=0, alpha=0.75, linetype="dotted") +
+    labs(x="Basepair position relative to center",
+         y="Average CAGE signal")
+```
+
+## Multiple sets of sites & single genome-wide signal
+
+H3K27ac at CAGE-defined TSSs at different positions in genes:
+```{r}
+by_txType <- CAGE_clusters %>%
+    subset(clusterType == "TSS" & txType %in% c("promoter", 
+                                                "fiveUTR", 
+                                                "proximal", 
+                                                "intron")) %>%
+    splitAsList(.$txType, drop=TRUE)
+
+MS <- tidyMetaProfile(sites = by_txType, 
+                      forward=ChIP_Seq$H3K27ac, reverse=NULL,
+                      upstream=1000, downstream=1000)
+
+ggplot(MS, aes(x=pos0, y=sense, color=sites)) + 
+    geom_line(alpha=0.75) + 
+    geom_vline(xintercept = 0, linetype="dotted", alpha=0.75) +
+    scale_color_brewer("Genic Context", palette="Set2") +
+    labs(x="Relative position from center", 
+         y="Average H3K27ac Signal")
+```
+
+## Multiple sets of sites & multiple genome-wide signal
+
+Unstranded example:
+```{r}
+by_clusterType <- split(CAGE_clusters, CAGE_clusters$clusterType)
+
+MM1 <- tidyMetaProfile(sites = by_clusterType, 
+                      forward=ChIP_Seq, reverse=NULL,
+                      upstream=1000, downstream=1000)
+
+ggplot(MM1, aes(x=pos0, y=sense, color=sites)) + 
+    geom_line(alpha=0.75) + 
+    facet_grid(signal~., scales="free_y") +
+    labs(x="Relative position from center", 
+         y="Average Signal")
+```
+
+Stranded exampled:
+```{r}
+MM2 <- tidyMetaProfile(sites = by_clusterType, 
+                      forward=CAGE_plus, reverse=CAGE_minus,
+                      upstream=500, downstream=500)
+
+MM2 %>%
+    gather(key="direction", value="score", sense, anti, factor_key=TRUE) %>%
+    ggplot(aes(x=pos0, y=score, color=direction)) + 
+    geom_line(alpha=0.75) + 
+    facet_grid(sites~signal, scales="free_y") +
+    scale_color_brewer("Direction", palette="Set1") +
+    labs(x="Relative position from center", 
+         y="Average Signal")
+```
+
+# Advanced usage
+
+## Parallel Execution
+
+In case multiple genomic signals are analyzed (Multiple BigWigFiles in BigWigFileList or multiple RleList-objects in a RleListList) signals can be analyzed in parallel using the BiocParallel package. TidyMetaProfile uses the default registered backend:
+
+```{r eval=FALSE}
+library(BiocParallel)
+
+# Set the backend to run calculations in series
+register(SerialParam())
+
+# Set the backend to run parallelize calculations using i.e. 3 cores:
+register(MulticoreParam(workers=3))
+```
+
+## Alternative meta-summary functions
+
+Instead of calculating the mean across sites, alternative summary functions can be provide. For example, instead of the average meta-profile, we can plot the median meta-profile:
+
+```{r}
+# Recalculate the first example using medians
+SS1_median <- tidyMetaProfile(sites = promoters_only, 
+                      forward=ChIP_Seq$DNase, reverse=NULL,
+                      upstream=1000, downstream=1000,
+                      sumFun = matrixStats::colMedians)
+
+# Merge the two profiles and plot
+list(mean=SS1, median=SS1_median) %>% 
+    bind_rows(.id="summary") %>%
+    ggplot(aes(x=pos0, y=sense, color=summary)) +
+    geom_line(alpha=0.75) +
+    geom_vline(xintercept=0, alpha=0.75, linetype="dotted") +
+    scale_color_discrete("Summary-function") +
+    labs(x="Basepair position relative to center",
+         y="Average DNase signal")
+```
+
+## Outlier removal/trimming
+
+In many cases, a few sites may have very extreme values which can disproportionally skew the calculated average profiles. tidyMetaProfile can automatically trim the sites with lowest and/or highest signals based on quantiles:
+
+```{r}
+# Recalculate the first example with different quantile trimmings:
+SS1_95percent <- tidyMetaProfile(sites = promoters_only, 
+                      forward=ChIP_Seq$DNase, reverse=NULL,
+                      upstream=1000, downstream=1000,
+                      trimUpper=0.95)
+
+SS1_90percent <- tidyMetaProfile(sites = promoters_only, 
+                      forward=ChIP_Seq$DNase, reverse=NULL,
+                      upstream=1000, downstream=1000,
+                      trimUpper=0.90)
+
+# Merge the three profiles and plot
+list(`100%`=SS1, 
+     `95%`=SS1_95percent, 
+     `90%`=SS1_90percent) %>% 
+    bind_rows(.id="summary") %>%
+    ggplot(aes(x=pos0, y=sense, color=summary)) +
+    geom_line(alpha=0.75) +
+    geom_vline(xintercept=0, alpha=0.75, linetype="dotted") +
+    scale_color_discrete("Trimming-level") +
+    labs(x="Basepair position relative to center",
+         y="Average DNase signal")
+```
+
+## Access to low-level functions
+
+The low-level functions used by tidyMetaProfile are all exposed for advanced user:
+
+- agnosticImport: Import of chunks from BigWigFile or RleList
+- wideMetaProfile: Output resulsts a site-by-position matrix.
+- quantileTrim: Trim outliers from a single matrix or a pair of matrices.
+
+Add some usage examples...
+
+# Session Info
+
+```{r}
+sessionInfo()
+```
