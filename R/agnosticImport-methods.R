@@ -1,3 +1,6 @@
+#' @include AllClasses.R AllGenerics.R
+NULL
+
 #' @rdname agnosticImport
 #' @export
 setMethod("agnosticImport",
@@ -12,10 +15,10 @@ setMethod("agnosticImport",
               if(!any(seqlevels(signal) %in% seqlevels(sites))) {
                         stop("Seqlevel inconsistency between sites and signal")
               }
-                    
+
               # Check dimensions
               if(length(o) != length(sites)){
-                  stop("BigWigFile was not properly imported!") # This should output the resource!
+                  stop("BigWigFile was not properly imported!") # Output path?
               }
 
               # Pass on names
@@ -37,8 +40,8 @@ setMethod("agnosticImport",
               # Check all sites seqlevels are in signal seqlevels
               if(!any(seqlevels(signal) %in% seqlevels(sites))) {
                         stop("Seqlevel inconsistency between sites and signal")
-              }      
-                    
+              }
+
               # Check dimensions
               if(length(o) != length(sites)){
                   stop("RleList was not properly imported!")

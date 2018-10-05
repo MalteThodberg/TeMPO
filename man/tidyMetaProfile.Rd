@@ -18,7 +18,7 @@ tidyMetaProfile(sites, forward, reverse = NULL, upstream = 100,
 
   \S4method{tidyMetaProfile}{GenomicRanges,BigWigFile_OR_RleList,NULL_OR_missing}(sites,
   forward, reverse = NULL, upstream = 100, downstream = 100,
-  trimLower = 0, trimUpper = 1, sumFun = matrixStats::colMeans2)
+  trimLower = 0, trimUpper = 1, sumFun = colMeans)
 
 
   \S4method{tidyMetaProfile}{GenomicRanges,BigWigFile_OR_RleList,BigWigFile_OR_RleList}(sites,
@@ -46,11 +46,15 @@ tidyMetaProfile(sites, forward, reverse = NULL, upstream = 100,
   trimLower = 0, trimUpper = 1, sumFun = matrixStats::colMeans2)
 }
 \arguments{
-\item{sites}{GenomicRanges: Single-bp genomic locations to calculate the meta-profile over.}
+\item{sites}{GenomicRanges: Single-bp genomic locations to calculate the
+meta-profile over.}
 
-\item{forward}{BigWigFile or RleList: Genome-wide signal stored either on disk as a BigWig-file or in memory as an RleList-object.}
+\item{forward}{BigWigFile or RleList: Genome-wide signal stored either on
+disk as a BigWig-file or in memory as an RleList-object.}
 
-\item{reverse}{BigWigFile, RleList or NULL: If reverse=NULL, the forward signal is taken as unstranded. If not the genomic signal is taken to be stranded. The class of reverse must be the same as forward.}
+\item{reverse}{BigWigFile, RleList or NULL: If reverse=NULL, the forward
+signal is taken as unstranded. If not the genomic signal is taken to be
+stranded. The class of reverse must be the same as forward.}
 
 \item{upstream}{integer: Number of bases to extend upstream.}
 
@@ -60,7 +64,8 @@ tidyMetaProfile(sites, forward, reverse = NULL, upstream = 100,
 
 \item{trimUpper}{numeric: Upper quantile used for trimming.}
 
-\item{sumFun}{function: The function used for summarising the metaprofile. Should be similar to colSums.}
+\item{sumFun}{function: The function used for summarising the metaprofile.
+Should be similar to colSums.}
 }
 \value{
 A tibble with the following columns
@@ -78,4 +83,30 @@ Depending on the input, addditional columns might be added
 }
 \description{
 TeMPO: Tidy Meta Profiles
+}
+\examples{
+data("CAGE_clusters")
+data("CAGE_plus")
+data("CAGE_minus")
+
+# Stranded Meta-profile across enhancers:
+P <- tidyMetaProfile(sites = subset(CAGE_clusters, clusterType=="enhancer"),
+                     forward = CAGE_plus,
+                     reverse = CAGE_minus,
+                     upstream=200,
+                     downstream=200)
+
+# Plot the resulting tibble with ggplot2:
+library(tidyr)
+library(ggplot2)
+
+P \%>\%
+gather(key="direction", value="score", sense, anti, factor_key=TRUE) \%>\%
+ggplot(aes(x=pos0, y=score, color=direction)) +
+geom_line(alpha=0.75) +
+scale_color_brewer("Direction", palette="Set1") +
+labs(x="Relative position from center",
+y="Average Signal")
+
+# See the TeMPO vignette for more examples and settings!
 }

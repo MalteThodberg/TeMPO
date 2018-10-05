@@ -1,3 +1,6 @@
+#' @include aaa.R
+NULL
+
 #### Helpers ####
 
 #' Advanced usage: Import chunks of a genome-wide vector
@@ -9,6 +12,22 @@
 #' @export
 #'
 #' @examples
+#' data("CAGE_clusters")
+#' data("CAGE_plus")
+#'
+#' # Import from an RleList
+#' agnosticImport(signal=CAGE_plus$WT, sites=subset(CAGE_clusters, strand=="+"))
+#'
+#' # Import from a BigWig
+# #\dontrun{
+# # Get DNase data from AnnotationHub
+# #library(AnnotationHub)
+# #ah <- AnnotationHub()
+# #DNase <- ah[["AH32877"]]
+#
+# ## Import only parts of the BigWig to conserve memory
+# # agnosticImport(signal=DNase, sites=subset(CAGE_clusters, strand=="+"))
+# #}
 setGeneric("agnosticImport", function(signal, sites) {
     standardGeneric("agnosticImport")
 })
@@ -43,13 +62,18 @@ setGeneric("quantileTrim",
 #' Advanced usage: Meta Profile in wide format
 #'
 #'
-#' @param sites GenomicRanges: Single-bp genomic locations to calculate the meta-profile over.
-#' @param forward BigWigFile or RleList: Genome-wide signal stored either on disk as a BigWig-file or in memory as an RleList-object.
-#' @param reverse BigWigFile, RleList or NULL: If reverse=NULL, the forward signal is taken as unstranded. If not the genomic signal is taken to be stranded. The class of reverse must be the same as forward.
+#' @param sites GenomicRanges: Single-bp genomic locations to calculate the
+#'   meta-profile over.
+#' @param forward BigWigFile or RleList: Genome-wide signal stored either on
+#'   disk as a BigWig-file or in memory as an RleList-object.
+#' @param reverse BigWigFile, RleList or NULL: If reverse=NULL, the forward
+#'   signal is taken as unstranded. If not the genomic signal is taken to be
+#'   stranded. The class of reverse must be the same as forward.
 #' @param upstream integer: Number of bases to extend upstream.
 #' @param downstream integer: Number of bases to extend downstream
 #'
-#' @return if reverse=NULL a matrix, else a list of two matrices with names "sense" and "anti"
+#' @return if reverse=NULL a matrix, else a list of two matrices with names
+#'   "sense" and "anti"
 #' @export
 #'
 #' @examples
@@ -77,7 +101,8 @@ setGeneric("wideMetaProfile", function(sites, forward, reverse=NULL,
 #' @inheritParams wideMetaProfile
 #' @param trimLower numeric: Lower quantile used for trimming.
 #' @param trimUpper numeric: Upper quantile used for trimming.
-#' @param sumFun function: The function used for summarising the metaprofile. Should be similar to colSums.
+#' @param sumFun function: The function used for summarising the metaprofile.
+#'   Should be similar to colSums.
 #'
 #' @return A tibble with the following columns
 #' \describe{
@@ -94,6 +119,30 @@ setGeneric("wideMetaProfile", function(sites, forward, reverse=NULL,
 #' @export
 #'
 #' @examples
+#' data("CAGE_clusters")
+#' data("CAGE_plus")
+#' data("CAGE_minus")
+#'
+#' # Stranded Meta-profile across enhancers:
+#' P <- tidyMetaProfile(sites = subset(CAGE_clusters, clusterType=="enhancer"),
+#'                      forward = CAGE_plus,
+#'                      reverse = CAGE_minus,
+#'                      upstream=200,
+#'                      downstream=200)
+#'
+#' # Plot the resulting tibble with ggplot2:
+#' library(tidyr)
+#' library(ggplot2)
+#'
+#' P %>%
+#' gather(key="direction", value="score", sense, anti, factor_key=TRUE) %>%
+#' ggplot(aes(x=pos0, y=score, color=direction)) +
+#' geom_line(alpha=0.75) +
+#' scale_color_brewer("Direction", palette="Set1") +
+#' labs(x="Relative position from center",
+#' y="Average Signal")
+#'
+#' # See the TeMPO vignette for more examples and settings!
 setGeneric("tidyMetaProfile",
            function(sites, forward, reverse=NULL,
                     upstream=100, downstream=100,

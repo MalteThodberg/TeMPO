@@ -1,23 +1,37 @@
-## ---- message=F, warning=F-------------------------------------------------
+## ----bioconductor, eval=FALSE----------------------------------------------
+#  if (!requireNamespace("BiocManager", quietly=TRUE))
+#      install.packages("BiocManager")
+#  BiocManager::install("TeMPO")
+
+## ----library, results='hide', message=FALSE--------------------------------
 library(TeMPO)
+
+## ----github, eval=FALSE----------------------------------------------------
+#  devtools::install_github("MalteThodberg/TeMPO")
+
+## ---- message=F, warning=F-------------------------------------------------
 library(tidyverse)
+library(AnnotationHub)
 
 theme_set(theme_light())
 
 ## --------------------------------------------------------------------------
-# Sites
 data("CAGE_clusters")
+CAGE_clusters
 
-# Unstraded genome-wide signals as BigWigFiles
-ChIP_Seq <- system.file("extdata", package = "TeMPO") %>%
-    list.files(full.names=TRUE) %>%
-    BigWigFileList()
-
-names(ChIP_Seq) <- c("DNase", "H3K27ac", "H3K4me1", "H3K4me3")
-
-# Stranded genome-wide signals as RleList
+## --------------------------------------------------------------------------
 data("CAGE_plus")
 data("CAGE_minus")
+CAGE_plus
+
+## --------------------------------------------------------------------------
+ah <- AnnotationHub()
+ChIP_Seq <- list(DNase="AH32877",
+     H3K4me1="AH32879",
+     H3K4me3="AH32881",
+     H3K27ac="AH32884") %>%
+    lapply(function(x) ah[[x]]) %>%
+    as("List")
 
 ## --------------------------------------------------------------------------
 promoters_only <- subset(CAGE_clusters, txType == "promoter")
@@ -25,6 +39,8 @@ promoters_only <- subset(CAGE_clusters, txType == "promoter")
 SS1 <- tidyMetaProfile(sites = promoters_only, 
                       forward=ChIP_Seq$DNase, reverse=NULL,
                       upstream=1000, downstream=1000)
+
+head(SS1)
 
 ggplot(SS1, aes(x=pos0, y=sense)) + 
     geom_line(alpha=0.75) +
@@ -39,6 +55,8 @@ SS2 <- tidyMetaProfile(sites = enhancers_only,
                       forward=CAGE_plus$WT, reverse=CAGE_minus$WT,
                       upstream=300, downstream=300)
 
+head(SS2)
+
 SS2 %>%
     gather(key="direction", value="score", sense, anti, factor_key=TRUE) %>%
     ggplot(aes(x=pos0, y=score, color=direction)) + 
@@ -52,6 +70,8 @@ SS2 %>%
 SM <- tidyMetaProfile(sites = promoters_only, 
                       forward=ChIP_Seq, reverse=NULL,
                       upstream=1000, downstream=1000)
+
+head(SM)
 
 ggplot(SM, aes(x=pos0, y=sense, color=signal)) + 
     geom_line(alpha=0.75) +
@@ -71,6 +91,8 @@ MS <- tidyMetaProfile(sites = by_txType,
                       forward=ChIP_Seq$H3K27ac, reverse=NULL,
                       upstream=1000, downstream=1000)
 
+head(MS)
+
 ggplot(MS, aes(x=pos0, y=sense, color=sites)) + 
     geom_line(alpha=0.75) + 
     geom_vline(xintercept = 0, linetype="dotted", alpha=0.75) +
@@ -85,6 +107,8 @@ MM1 <- tidyMetaProfile(sites = by_clusterType,
                       forward=ChIP_Seq, reverse=NULL,
                       upstream=1000, downstream=1000)
 
+head(MM1)
+
 ggplot(MM1, aes(x=pos0, y=sense, color=sites)) + 
     geom_line(alpha=0.75) + 
     facet_grid(signal~., scales="free_y") +
@@ -95,6 +119,8 @@ ggplot(MM1, aes(x=pos0, y=sense, color=sites)) +
 MM2 <- tidyMetaProfile(sites = by_clusterType, 
                       forward=CAGE_plus, reverse=CAGE_minus,
                       upstream=500, downstream=500)
+
+head(MM2)
 
 MM2 %>%
     gather(key="direction", value="score", sense, anti, factor_key=TRUE) %>%

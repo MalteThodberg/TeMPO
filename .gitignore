@@ -3,3 +3,5 @@
 .RData
 .Ruserdata
 inst/doc
+vignettes/TeMPO.html
+vignettes/TeMPO.R

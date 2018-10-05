@@ -19,18 +19,23 @@ wideMetaProfile(sites, forward, reverse = NULL, upstream = 100,
   forward, reverse = NULL, upstream = 100, downstream = 100)
 }
 \arguments{
-\item{sites}{GenomicRanges: Single-bp genomic locations to calculate the meta-profile over.}
+\item{sites}{GenomicRanges: Single-bp genomic locations to calculate the
+meta-profile over.}
 
-\item{forward}{BigWigFile or RleList: Genome-wide signal stored either on disk as a BigWig-file or in memory as an RleList-object.}
+\item{forward}{BigWigFile or RleList: Genome-wide signal stored either on
+disk as a BigWig-file or in memory as an RleList-object.}
 
-\item{reverse}{BigWigFile, RleList or NULL: If reverse=NULL, the forward signal is taken as unstranded. If not the genomic signal is taken to be stranded. The class of reverse must be the same as forward.}
+\item{reverse}{BigWigFile, RleList or NULL: If reverse=NULL, the forward
+signal is taken as unstranded. If not the genomic signal is taken to be
+stranded. The class of reverse must be the same as forward.}
 
 \item{upstream}{integer: Number of bases to extend upstream.}
 
 \item{downstream}{integer: Number of bases to extend downstream}
 }
 \value{
-if reverse=NULL a matrix, else a list of two matrices with names "sense" and "anti"
+if reverse=NULL a matrix, else a list of two matrices with names
+  "sense" and "anti"
 }
 \description{
 Advanced usage: Meta Profile in wide format

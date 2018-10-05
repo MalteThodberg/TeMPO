@@ -7,86 +7,105 @@ abstract: >
 output: 
     BiocStyle::html_document
 vignette: >
-    %\VignetteIndexEntry{Vignette Title}
+    %\VignetteIndexEntry{TeMPO}
     %\VignetteEngine{knitr::rmarkdown}
     %\VignetteEncoding{UTF-8}  
 ---
 
 # Installation
 
-TBA
+Install the most recent stable version from Bioconductor:
 
-# Citation
+```{r bioconductor, eval=FALSE}
+if (!requireNamespace("BiocManager", quietly=TRUE))
+    install.packages("BiocManager")
+BiocManager::install("TeMPO")
+```
 
-TBA
+And load `TeMPO`:
+
+```{r library, results='hide', message=FALSE}
+library(TeMPO)
+```
+
+Alternatetively, you can install the development version directly from GitHub using `devtools`:
+
+```{r github, eval=FALSE}
+devtools::install_github("MalteThodberg/TeMPO")
+```
 
 # Getting help and contact
 
-TBA
+For general questions about the usage of TeMPO, use the [official Bioconductor support forum](https://support.bioconductor.org) and tag your question "TeMPO". We strive to answer questions as quickly as possible.
 
-# Quick start
-
-TBA
-
-# Introduction
-
-## Meta profiles
-
-TBA
-
-## Bioconductor vs the Tidyverse
-
-TBA
+For technical questions, bug reports and suggestions for new features, we refer to the [TeMPO github page](https://github.com/MalteThodberg/TeMPO/issues)
 
 # Usage examples
 
-## Needed inputs
+## Inputs and outputs
 
-- A set of sites as a GRanges
-- A set of genome-wide signals as a BigWigFile or RleList
+TeMPO can calculate the summarized signal (e.g. the average counts-per-millon) across a set of genomic regions (e.g. Transcription Start Sites (TSSs) and enhancers). TeMPO needs the following input:
 
-## Example data set
+- One or more sets of genomic sites as a GRanges or GRangesList.
+- One or more sets of genome-wide signals as a BigWigFile or BigWigFilelist (or RleList or RleListList if the genome is very small and/or the genome-wide signal is very sparse).
 
-Subsets of data for hela cells (hg19) chromosomes 20-22:
+TeMPO will output the result in "tidy" format as a tibble, making it easy to further analyze or plot the data using ggplot2 and the tidyverse packages.
 
-- CAGE data from "Nuclear stability and transcriptional directionality separate functionally distinct RNA species" by Andersson et al.
-- ChIP-Seq and DNase-Seq data from The Roadmap Epigenomics Project.
+## Example data sets
 
-Load the needed packages:
+TeMPO example below use example data for hela cells (hg19) chromosomes 20-22 from the following sources:
+
+- CAGE data from "Nuclear stability and transcriptional directionality separate functionally distinct RNA species" by Andersson et al. preprocessed using the CAGEfightR package.
+- ChIP-Seq and DNase-Seq data from The Roadmap Epigenomics Project obtained via the AnnotationHub package.
+
+First, we load the needed packages:
 
 ```{r, message=F, warning=F}
-library(TeMPO)
 library(tidyverse)
+library(AnnotationHub)
 
 theme_set(theme_light())
 ```
 
-Load the examples data
+`CAGE_clusters` contain the location of TSSs and enhancer found using the CAGEfightR package. TSSs and enhancers are expected to show different epigenetic modifications, reflecting their different function:
 ```{r}
-# Sites
 data("CAGE_clusters")
+CAGE_clusters
+```
 
-# Unstraded genome-wide signals as BigWigFiles
-ChIP_Seq <- system.file("extdata", package = "TeMPO") %>%
-    list.files(full.names=TRUE) %>%
-    BigWigFileList()
+`CAGE_plus` and `CAGE_minus` contains the pooled CAGE signal across wildtype cells (WT) and exosome knock-out cell (KD). The exosome knock-down is expected to stabilize eRNA transcripts produces from enhancers that are normally quickly degraded. As the CAGE data is very sparse, it can be loaded directly into memory as an `RleListList`:
 
-names(ChIP_Seq) <- c("DNase", "H3K27ac", "H3K4me1", "H3K4me3")
-
-# Stranded genome-wide signals as RleList
+```{r}
 data("CAGE_plus")
 data("CAGE_minus")
+CAGE_plus
 ```
+
+We can obtain epigenetic data for comparison to the CAGE data using the AnnotationHub package. As ChIP-Seq and DNase-signal is not sparse, we will store these signals as BigWigFile-objects rather than load them into memory. __NOTE: The first time you run this, it will take several minutes for AnnotationHub to download the file. After that, AnnotationHub will simply fetch the file from cache, as is done here:__
+
+```{r}
+ah <- AnnotationHub()
+ChIP_Seq <- list(DNase="AH32877",
+     H3K4me1="AH32879",
+     H3K4me3="AH32881",
+     H3K27ac="AH32884") %>%
+    lapply(function(x) ah[[x]]) %>%
+    as("List")
+```
+
+Below are examples of generating metaprofiles for different combinations of input.
 
 ## Single set of sites & single genome-wide signal
 
-Simple example of DNAse-signal around promoters:
+A simple example of (unstranded) DNAse-signal around promoters:
 ```{r}
 promoters_only <- subset(CAGE_clusters, txType == "promoter")
 
 SS1 <- tidyMetaProfile(sites = promoters_only, 
                       forward=ChIP_Seq$DNase, reverse=NULL,
                       upstream=1000, downstream=1000)
+
+head(SS1)
 
 ggplot(SS1, aes(x=pos0, y=sense)) + 
     geom_line(alpha=0.75) +
@@ -95,13 +114,15 @@ ggplot(SS1, aes(x=pos0, y=sense)) +
          y="Average DNase signal")
 ```
 
-Classic example of bidirectional transcription of eRNAs at enhancers:
+Classic example of bidirectional transcription of eRNAs at enhancers shown using a stranded meta-profile:
 ```{r}
 enhancers_only <- subset(CAGE_clusters, clusterType == "enhancer")
 
 SS2 <- tidyMetaProfile(sites = enhancers_only, 
                       forward=CAGE_plus$WT, reverse=CAGE_minus$WT,
                       upstream=300, downstream=300)
+
+head(SS2)
 
 SS2 %>%
     gather(key="direction", value="score", sense, anti, factor_key=TRUE) %>%
@@ -115,10 +136,13 @@ SS2 %>%
 
 ## Single set of sites & multiple genome-wide signal
 
+Multiple different epigentic signals across a single set of sites:
 ```{r}
 SM <- tidyMetaProfile(sites = promoters_only, 
                       forward=ChIP_Seq, reverse=NULL,
                       upstream=1000, downstream=1000)
+
+head(SM)
 
 ggplot(SM, aes(x=pos0, y=sense, color=signal)) + 
     geom_line(alpha=0.75) +
@@ -142,6 +166,8 @@ MS <- tidyMetaProfile(sites = by_txType,
                       forward=ChIP_Seq$H3K27ac, reverse=NULL,
                       upstream=1000, downstream=1000)
 
+head(MS)
+
 ggplot(MS, aes(x=pos0, y=sense, color=sites)) + 
     geom_line(alpha=0.75) + 
     geom_vline(xintercept = 0, linetype="dotted", alpha=0.75) +
@@ -152,13 +178,15 @@ ggplot(MS, aes(x=pos0, y=sense, color=sites)) +
 
 ## Multiple sets of sites & multiple genome-wide signal
 
-Unstranded example:
+Meta-profile showing the difference in epigentic modifications at TSSs vs enhancers:
 ```{r}
 by_clusterType <- split(CAGE_clusters, CAGE_clusters$clusterType)
 
 MM1 <- tidyMetaProfile(sites = by_clusterType, 
                       forward=ChIP_Seq, reverse=NULL,
                       upstream=1000, downstream=1000)
+
+head(MM1)
 
 ggplot(MM1, aes(x=pos0, y=sense, color=sites)) + 
     geom_line(alpha=0.75) + 
@@ -167,11 +195,13 @@ ggplot(MM1, aes(x=pos0, y=sense, color=sites)) +
          y="Average Signal")
 ```
 
-Stranded exampled:
+Meta-profile showing the effect of the exosome knockdown on eRNAs detected by CAGE:
 ```{r}
 MM2 <- tidyMetaProfile(sites = by_clusterType, 
                       forward=CAGE_plus, reverse=CAGE_minus,
                       upstream=500, downstream=500)
+
+head(MM2)
 
 MM2 %>%
     gather(key="direction", value="score", sense, anti, factor_key=TRUE) %>%
@@ -187,7 +217,7 @@ MM2 %>%
 
 ## Parallel Execution
 
-In case multiple genomic signals are analyzed (Multiple BigWigFiles in BigWigFileList or multiple RleList-objects in a RleListList) signals can be analyzed in parallel using the BiocParallel package. TidyMetaProfile uses the default registered backend:
+In case multiple genomic signals are provided (Multiple `BigWigFile`-objects in a `BigWigFileList` or multiple `RleList`-objects in an `RleListList`), signals can be analyzed in parallel using the BiocParallel package. TidyMetaProfile uses the default registered backend:
 
 ```{r eval=FALSE}
 library(BiocParallel)
@@ -254,11 +284,11 @@ list(`100%`=SS1,
 
 The low-level functions used by tidyMetaProfile are all exposed for advanced user:
 
-- agnosticImport: Import of chunks from BigWigFile or RleList
-- wideMetaProfile: Output resulsts a site-by-position matrix.
-- quantileTrim: Trim outliers from a single matrix or a pair of matrices.
+- `agnosticImport`: Import of chunks from BigWigFile or RleList
+- `wideMetaProfile`: Output results as a site-by-position matrix.
+- `quantileTrim`: Trim outliers from a single matrix or a pair of matrices.
 
-Add some usage examples...
+The man pages for those functions contains details on how to use them. 
 
 # Session Info
 

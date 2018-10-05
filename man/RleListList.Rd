@@ -3,18 +3,31 @@
 \docType{class}
 \name{RleListList-class}
 \alias{RleListList-class}
-\alias{.RleListList}
 \alias{RleListList}
 \title{List of RleList-objects}
 \usage{
 RleListList(...)
 }
 \arguments{
-\item{...}{RleLists}
+\item{...}{RleList-objects to be gathered into a list.}
 }
 \value{
 RleListList
 }
 \description{
-List of RleList-objects
+The RleListList is simply a List where all elements are RleList. The most
+likely use case is a collection of genome-wide signals calculated using e.g.
+coverage() or imported using import.bw().
+}
+\examples{
+# Example coverage calculate
+gr <- GRanges(seqnames = paste0("chr1", 1:10),
+              ranges = IRanges(1:10, width = 1))
+cvg <- coverage(gr)
+
+# Use constructor:
+RleListList(cvg, cvg)
+
+# Or simply coerce to a List
+as(list(cvg, cvg), "List")
 }

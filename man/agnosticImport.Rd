@@ -24,3 +24,12 @@ NumericList
 \description{
 Advanced usage: Import chunks of a genome-wide vector
 }
+\examples{
+data("CAGE_clusters")
+data("CAGE_plus")
+
+# Import from an RleList
+agnosticImport(signal=CAGE_plus$WT, sites=subset(CAGE_clusters, strand=="+"))
+
+# Import from a BigWig
+}

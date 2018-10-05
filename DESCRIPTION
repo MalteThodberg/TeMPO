@@ -1,23 +1,22 @@
 Package: TeMPO
 Type: Package
 Title: Tidy Meta Profiles using Bioconductor and the Tidyverse
-Version: 0.1.0
+Version: 0.2.0
 Author: Malte Thodberg
 Maintainer: Malte Thodberg <maltethodberg@gmail.com>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Description: Calculate the meta-profile across multiple sets, strands and signals using Bioconductor and output the result in tidy format for further analysis and plotting using the tidyverse. Includes advanced functionality for outlier trimming, custom summary functions and parallel execution.
 Depends:
     R (>= 3.5),
     S4Vectors,
     GenomicRanges,
     rtracklayer
 Imports:
-	assertthat(>= 0.2.0),
+	assertthat,
 	methods,
-    BiocGenerics(>= 0.24.0),
-    IRanges(>= 2.12.0),
-    GenomeInfoDb(>= 1.14.0),
-    BiocParallel(>= 1.12.0),
+    BiocGenerics,
+    IRanges,
+    GenomeInfoDb,
+    BiocParallel,
     matrixStats,
     tibble,
     dplyr
@@ -25,9 +24,22 @@ Suggests:
     knitr,
     rmarkdown,
     BiocStyle,
+    AnnotationHub,
+    tidyr,
+    ggplot2,
     tidyverse
 License: GPL-3 + file LICENSE
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.0
 VignetteBuilder: knitr
+Collate: 
+    'aaa.R'
+    'AllClasses.R'
+    'AllGenerics.R'
+    'agnosticImport-methods.R'
+    'data.R'
+    'quantileTrim-methods.R'
+    'tidyMetaProfile-methods.R'
+    'wideMetaProfile-methods.R'
+biocViews: Software, Coverage, DataImport, DataRepresentation, Preprocessing, Visualization, Transcriptomics, Epigenetics, NucleosomePositioning, HistoneModification

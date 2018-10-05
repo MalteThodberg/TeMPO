@@ -17,6 +17,7 @@ setMethod("quantileTrim",
           })
 
 #' @rdname quantileTrim
+#' @importFrom matrixStats rowSums2
 #' @export
 setMethod("quantileTrim",
           signature(mat1="matrix", mat2="matrix"),
@@ -24,8 +25,8 @@ setMethod("quantileTrim",
               stopifnot(all(dim(mat1) == dim(mat2)))
 
               # Get rowsums
-              x1 <- matrixStats::rowSums2(mat1)
-              x2 <- matrixStats::rowSums2(mat2)
+              x1 <- rowSums2(mat1)
+              x2 <- rowSums2(mat2)
 
               # Get limits
               lims1 <- quantile(x1, c(lower, upper))

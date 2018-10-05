@@ -1,5 +1,3 @@
 #' @importFrom methods new setClass setGeneric setMethod
-NULL
-#' @import BiocGenerics S4Vectors IRanges GenomeInfoDb GenomicRanges
-#'   rtracklayer
+#' @import assertthat BiocParallel BiocGenerics S4Vectors IRanges GenomeInfoDb GenomicRanges GenomicRanges rtracklayer
 NULL

@@ -47,6 +47,7 @@ KD <- CTSSs[,4:6] %>%
 
 FS <- . %>%
     rowRanges %>%
+    as("GRanges") %>%
     subset(seqnames %in% paste0("chr", 20:22)) %>%
     CAGEfightR:::splitByStrand() %>%
     lapply(coverage, weight="score")
