@@ -11,8 +11,6 @@ library(TeMPO)
 
 ## ---- message=F, warning=F-------------------------------------------------
 library(tidyverse)
-library(AnnotationHub)
-
 theme_set(theme_light())
 
 ## --------------------------------------------------------------------------
@@ -25,13 +23,42 @@ data("CAGE_minus")
 CAGE_plus
 
 ## --------------------------------------------------------------------------
-ah <- AnnotationHub()
-ChIP_Seq <- list(DNase="AH32877",
-     H3K4me1="AH32879",
-     H3K4me3="AH32881",
-     H3K27ac="AH32884") %>%
-    lapply(function(x) ah[[x]]) %>%
+# Locate the bigwig files and name them
+bw_files <- system.file("extdata", package="TeMPO") %>% 
+    list.files(full.names=TRUE)
+
+names(bw_files) <- bw_files %>%
+    basename() %>%
+    tools::file_path_sans_ext()
+    
+# Save them as a BigWigFileList
+ChIP_Seq <- bw_files %>%
+    lapply(BigWigFile) %>%
     as("List")
+
+## ---- eval=FALSE-----------------------------------------------------------
+#  # NOTE: The first time you run this, it will take several minutes for AnnotationHub to download the file. After that, AnnotationHub will simply fetch the file from cache, as is done here:__
+#  ah <- AnnotationHub()
+#  ChIP_Seq <- list(DNase="AH32877",
+#       H3K4me1="AH32879",
+#       H3K4me3="AH32881",
+#       H3K27ac="AH32884") %>%
+#      lapply(function(x) ah[[x]]) %>%
+#      as("List")
+
+## ---- eval=FALSE-----------------------------------------------------------
+#  # Get metadata
+#  ah <- AnnotationHub()
+#  meta_data <- ah[c("AH32877", "AH32879", "AH32881", "AH32884")] %>%
+#      mcols
+#  
+#  # Make BigWigFileList of URLs and set names
+#  ChIP_Seq <- meta_data$sourceurl %>%
+#      lapply(BigWigFile) %>%
+#      as("List")
+#  
+#  names(ChIP_Seq) <- str_remove_all(meta_data$title,
+#                                    pattern = "E117-|.fc.signal.bigwig")
 
 ## --------------------------------------------------------------------------
 promoters_only <- subset(CAGE_clusters, txType == "promoter")

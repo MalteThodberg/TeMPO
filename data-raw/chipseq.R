@@ -8,11 +8,18 @@ library(GenomicRanges)
 library(rtracklayer)
 library(AnnotationHub)
 library(magrittr)
+library(TeMPO)
 
 ah <- AnnotationHub()
 
-si <- SeqinfoForBSGenome("hg19")
-ss <- as(si, "GRanges")[c("chr20", "chr21", "chr22")]
+# Don't use whole genomes
+# si <- SeqinfoForBSGenome("hg19")
+# ss <- as(si, "GRanges")[c("chr20", "chr21", "chr22")]
+
+# Only signal around CAGEclusters
+data("CAGE_clusters")
+ss <- reduce(CAGE_clusters + 1000L)
+
 query(ah, c("hela", "fc", "bigwig")) %>%
     mcols %>%
     View

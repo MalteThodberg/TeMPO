@@ -24,7 +24,7 @@ Suggests:
     knitr,
     rmarkdown,
     BiocStyle,
-    AnnotationHub,
+    tools,
     tidyr,
     ggplot2,
     tidyverse
