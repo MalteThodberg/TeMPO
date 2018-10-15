@@ -45,19 +45,6 @@ KD <- CTSSs[,4:6] %>%
     calcTPM %>%
     calcPooled
 
-FS <- . %>%
-    rowRanges %>%
-    as("GRanges") %>%
-    subset(seqnames %in% paste0("chr", 20:22)) %>%
-    CAGEfightR:::splitByStrand() %>%
-    lapply(coverage, weight="score")
-
-WT_stranded <- WT %>% FS
-KD_stranded <- KD %>% FS
-
-CAGE_plus <- List(WT=WT_stranded$`+`, KD=KD_stranded$`+`)
-CAGE_minus <- List(WT=WT_stranded$`-`, KD=KD_stranded$`-`)
-
 #### Clusters ####
 
 TCs <- quickTSSs(WT)
@@ -90,6 +77,23 @@ CAGE_clusters <- c(Enhancers, TSSs[!overlapsAny(TSSs, Enhancers)]) %>%
     subset(seqnames %in% paste0("chr", 20:22)) %>%
     swapRanges() %>%
     subset(select=c(score, clusterType, txType))
+
+#### Subset coverage ####
+
+FS <- . %>%
+    rowRanges %>%
+    as("GRanges") %>%
+    subsetByOverlaps(CAGE_clusters + 500) %>%
+    #subset(seqnames %in% paste0("chr", 20:22)) %>%
+    CAGEfightR:::splitByStrand() %>%
+    lapply(coverage, weight="score") %>%
+    lapply(round, digits=8)
+
+WT_stranded <- WT %>% FS
+KD_stranded <- KD %>% FS
+
+CAGE_plus <- List(WT=WT_stranded$`+`, KD=KD_stranded$`+`)
+CAGE_minus <- List(WT=WT_stranded$`-`, KD=KD_stranded$`-`)
 
 #### Annotated ####
 #

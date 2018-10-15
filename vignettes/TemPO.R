@@ -65,7 +65,7 @@ promoters_only <- subset(CAGE_clusters, txType == "promoter")
 
 SS1 <- tidyMetaProfile(sites = promoters_only, 
                       forward=ChIP_Seq$DNase, reverse=NULL,
-                      upstream=400, downstream=400)
+                      upstream=300, downstream=300)
 
 head(SS1)
 
@@ -80,7 +80,7 @@ enhancers_only <- subset(CAGE_clusters, clusterType == "enhancer")
 
 SS2 <- tidyMetaProfile(sites = enhancers_only, 
                       forward=CAGE_plus$WT, reverse=CAGE_minus$WT,
-                      upstream=300, downstream=300)
+                      upstream=250, downstream=250)
 
 head(SS2)
 
@@ -96,7 +96,7 @@ SS2 %>%
 ## --------------------------------------------------------------------------
 SM <- tidyMetaProfile(sites = promoters_only, 
                       forward=ChIP_Seq, reverse=NULL,
-                      upstream=400, downstream=400)
+                      upstream=300, downstream=300)
 
 head(SM)
 
@@ -116,7 +116,7 @@ by_txType <- CAGE_clusters %>%
 
 MS <- tidyMetaProfile(sites = by_txType, 
                       forward=ChIP_Seq$DNase, reverse=NULL,
-                      upstream=400, downstream=400)
+                      upstream=300, downstream=300)
 
 head(MS)
 
@@ -132,7 +132,7 @@ by_clusterType <- split(CAGE_clusters, CAGE_clusters$clusterType)
 
 MM1 <- tidyMetaProfile(sites = by_clusterType, 
                       forward=ChIP_Seq, reverse=NULL,
-                      upstream=400, downstream=400)
+                      upstream=300, downstream=300)
 
 head(MM1)
 
@@ -145,7 +145,7 @@ ggplot(MM1, aes(x=pos0, y=sense, color=sites)) +
 ## --------------------------------------------------------------------------
 MM2 <- tidyMetaProfile(sites = by_clusterType, 
                       forward=CAGE_plus, reverse=CAGE_minus,
-                      upstream=400, downstream=400)
+                      upstream=300, downstream=300)
 
 head(MM2)
 
@@ -171,7 +171,7 @@ MM2 %>%
 # Recalculate the first example using medians
 SS1_median <- tidyMetaProfile(sites = promoters_only, 
                       forward=ChIP_Seq$DNase, reverse=NULL,
-                      upstream=400, downstream=400,
+                      upstream=300, downstream=300,
                       sumFun = matrixStats::colMedians)
 
 # Merge the two profiles and plot
@@ -188,12 +188,12 @@ list(mean=SS1, median=SS1_median) %>%
 # Recalculate the first example with different quantile trimmings:
 SS1_95percent <- tidyMetaProfile(sites = promoters_only, 
                       forward=ChIP_Seq$DNase, reverse=NULL,
-                      upstream=400, downstream=400,
+                      upstream=300, downstream=300,
                       trimUpper=0.95)
 
 SS1_90percent <- tidyMetaProfile(sites = promoters_only, 
                       forward=ChIP_Seq$DNase, reverse=NULL,
-                      upstream=400, downstream=400,
+                      upstream=300, downstream=300,
                       trimUpper=0.90)
 
 # Merge the three profiles and plot
