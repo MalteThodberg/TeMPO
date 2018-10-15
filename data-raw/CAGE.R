@@ -53,7 +53,7 @@ BCs <- quickEnhancers(WT)
 #
 TSSs <- TCs %>%
     calcTPM %>%
-    subsetBySupport(inputAssay="TPM", unexpressed=1, minSamples=2) %>%
+    subsetBySupport(inputAssay="TPM", unexpressed=10, minSamples=2) %>%
     rowRanges
 library(TxDb.Hsapiens.UCSC.hg19.knownGene)
 txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene

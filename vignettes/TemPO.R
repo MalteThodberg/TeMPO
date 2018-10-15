@@ -110,8 +110,7 @@ ggplot(SM, aes(x=pos0, y=sense, color=signal)) +
 by_txType <- CAGE_clusters %>%
     subset(clusterType == "TSS" & txType %in% c("promoter", 
                                                 "fiveUTR", 
-                                                "proximal", 
-                                                "intron")) %>%
+                                                "proximal")) %>%
     splitAsList(.$txType, drop=TRUE)
 
 MS <- tidyMetaProfile(sites = by_txType, 

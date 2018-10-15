@@ -187,8 +187,7 @@ H3K27ac at CAGE-defined TSSs at different positions in genes:
 by_txType <- CAGE_clusters %>%
     subset(clusterType == "TSS" & txType %in% c("promoter", 
                                                 "fiveUTR", 
-                                                "proximal", 
-                                                "intron")) %>%
+                                                "proximal")) %>%
     splitAsList(.$txType, drop=TRUE)
 
 MS <- tidyMetaProfile(sites = by_txType, 
