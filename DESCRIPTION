@@ -1,7 +1,7 @@
 Package: TeMPO
 Type: Package
 Title: Tidy Meta Profiles using Bioconductor and the Tidyverse
-Version: 0.99.1
+Version: 0.99.2
 Author: Malte Thodberg
 Maintainer: Malte Thodberg <maltethodberg@gmail.com>
 Description: Calculate the meta-profile across multiple sets, strands and signals using Bioconductor and output the result in tidy format for further analysis and plotting using the tidyverse. Includes advanced functionality for outlier trimming, custom summary functions and parallel execution.

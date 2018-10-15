@@ -18,7 +18,7 @@ ah <- AnnotationHub()
 
 # Only signal around CAGEclusters
 data("CAGE_clusters")
-ss <- reduce(CAGE_clusters + 500L)
+ss <- reduce(CAGE_clusters + 400L)
 
 query(ah, c("hela", "fc", "bigwig")) %>%
     mcols %>%
