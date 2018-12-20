@@ -10,7 +10,10 @@ library(TeMPO)
 #  devtools::install_github("MalteThodberg/TeMPO")
 
 ## ---- message=F, warning=F-------------------------------------------------
+library(AnnotationHub)
 library(tidyverse)
+
+# Use light ggplot2 theme
 theme_set(theme_light())
 
 ## --------------------------------------------------------------------------
@@ -22,43 +25,17 @@ data("CAGE_plus")
 data("CAGE_minus")
 CAGE_plus
 
-## --------------------------------------------------------------------------
-# Locate the bigwig files and name them
-bw_files <- system.file("extdata", package="TeMPO") %>% 
-    list.files(full.names=TRUE)
+## ---- message=F, warning=F-------------------------------------------------
+# Setup AnnotationHub
+ah <- AnnotationHub()
 
-names(bw_files) <- bw_files %>%
-    basename() %>%
-    tools::file_path_sans_ext()
-    
-# Save them as a BigWigFileList
-ChIP_Seq <- bw_files %>%
-    lapply(BigWigFile) %>%
+# Retrive data and save as BigWigFileList
+ChIP_Seq <- list(DNase="AH32877",
+     H3K4me1="AH32879",
+     H3K4me3="AH32881",
+     H3K27ac="AH32884") %>%
+    lapply(function(x) ah[[x]]) %>%
     as("List")
-
-## ---- eval=FALSE-----------------------------------------------------------
-#  # NOTE: The first time you run this, it will take several minutes for AnnotationHub to download the file. After that, AnnotationHub will simply fetch the file from cache, as is done here:__
-#  ah <- AnnotationHub()
-#  ChIP_Seq <- list(DNase="AH32877",
-#       H3K4me1="AH32879",
-#       H3K4me3="AH32881",
-#       H3K27ac="AH32884") %>%
-#      lapply(function(x) ah[[x]]) %>%
-#      as("List")
-
-## ---- eval=FALSE-----------------------------------------------------------
-#  # Get metadata
-#  ah <- AnnotationHub()
-#  meta_data <- ah[c("AH32877", "AH32879", "AH32881", "AH32884")] %>%
-#      mcols
-#  
-#  # Make BigWigFileList of URLs and set names
-#  ChIP_Seq <- meta_data$sourceurl %>%
-#      lapply(BigWigFile) %>%
-#      as("List")
-#  
-#  names(ChIP_Seq) <- str_remove_all(meta_data$title,
-#                                    pattern = "E117-|.fc.signal.bigwig")
 
 ## --------------------------------------------------------------------------
 promoters_only <- subset(CAGE_clusters, txType == "promoter")

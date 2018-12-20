@@ -16,19 +16,21 @@ quantileTrim(mat1, mat2 = NULL, lower = 0, upper = 1)
   upper = 1)
 }
 \arguments{
-\item{mat1}{matrix}
+\item{mat1}{matrix: Sites in rows, positions in columns.}
 
-\item{mat2}{matrix or NULL}
+\item{mat2}{matrix or NULL: Optional second matrix with the same shape.}
 
-\item{lower}{numeric}
+\item{lower}{numeric: Lower cutoff for trimming (between 0-1).}
 
-\item{upper}{numeric}
+\item{upper}{numeric: Upper cutoff for trimming (between 0-1).}
 }
 \value{
 trimmed matrix or list of trimmed matrices
 }
 \description{
-Advanced usage: Quantile trim a matrix or matrix pair
+Internal function for performing the quantile trimming. Removes outlier rows
+with the highest or lowest sums. If two matrices are supplied, trims both
+matrices simultaniously.
 }
 \examples{
 # Make some random matrices

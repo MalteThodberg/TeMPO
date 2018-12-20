@@ -5,8 +5,10 @@ NULL
 
 #' Advanced usage: Import chunks of a genome-wide vector
 #'
-#' @param signal BigWigFile or RleList
-#' @param sites GenomicRanges
+#' Import regions from coverage stored as a BigWigFile or RleList and return a NumericList.
+#'
+#' @param signal BigWigFile or RleList: Genomic signal
+#' @param sites GenomicRanges: Regions to be extracted
 #'
 #' @return NumericList
 #' @export
@@ -19,25 +21,29 @@ NULL
 #' agnosticImport(signal=CAGE_plus$WT, sites=subset(CAGE_clusters, strand=="+"))
 #'
 #' # Import from a BigWig
-# #\dontrun{
+#' \dontrun{
 # # Get DNase data from AnnotationHub
-# #library(AnnotationHub)
-# #ah <- AnnotationHub()
-# #DNase <- ah[["AH32877"]]
+# library(AnnotationHub)
+# ah <- AnnotationHub()
+# DNase <- ah[["AH32877"]]
 #
-# ## Import only parts of the BigWig to conserve memory
-# # agnosticImport(signal=DNase, sites=subset(CAGE_clusters, strand=="+"))
-# #}
+# # Import only parts of the BigWig to conserve memory
+# agnosticImport(signal=DNase, sites=subset(CAGE_clusters, strand=="+"))
+#' }
 setGeneric("agnosticImport", function(signal, sites) {
     standardGeneric("agnosticImport")
 })
 
 #' Advanced usage: Quantile trim a matrix or matrix pair
 #'
-#' @param mat1 matrix
-#' @param mat2 matrix or NULL
-#' @param lower numeric
-#' @param upper numeric
+#' Internal function for performing the quantile trimming. Removes outlier rows
+#' with the highest or lowest sums. If two matrices are supplied, trims both
+#' matrices simultaniously.
+#'
+#' @param mat1 matrix: Sites in rows, positions in columns.
+#' @param mat2 matrix or NULL: Optional second matrix with the same shape.
+#' @param lower numeric: Lower cutoff for trimming (between 0-1).
+#' @param upper numeric: Upper cutoff for trimming (between 0-1).
 #'
 #' @return trimmed matrix or list of trimmed matrices
 #' @export
@@ -61,6 +67,7 @@ setGeneric("quantileTrim",
 
 #' Advanced usage: Meta Profile in wide format
 #'
+#' Calculates the wide-format meta profile, with regions in rows and positions in columns.
 #'
 #' @param sites GenomicRanges: Single-bp genomic locations to calculate the
 #'   meta-profile over.

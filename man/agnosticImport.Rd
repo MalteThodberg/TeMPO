@@ -14,15 +14,15 @@ agnosticImport(signal, sites)
 \S4method{agnosticImport}{RleList,GenomicRanges}(signal, sites)
 }
 \arguments{
-\item{signal}{BigWigFile or RleList}
+\item{signal}{BigWigFile or RleList: Genomic signal}
 
-\item{sites}{GenomicRanges}
+\item{sites}{GenomicRanges: Regions to be extracted}
 }
 \value{
 NumericList
 }
 \description{
-Advanced usage: Import chunks of a genome-wide vector
+Import regions from coverage stored as a BigWigFile or RleList and return a NumericList.
 }
 \examples{
 data("CAGE_clusters")
@@ -32,4 +32,6 @@ data("CAGE_plus")
 agnosticImport(signal=CAGE_plus$WT, sites=subset(CAGE_clusters, strand=="+"))
 
 # Import from a BigWig
+\dontrun{
+}
 }

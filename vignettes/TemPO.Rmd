@@ -28,7 +28,7 @@ And load `TeMPO`:
 library(TeMPO)
 ```
 
-Alternatetively, you can install the development version directly from GitHub using `devtools`:
+Alternatively, you can install the development version directly from GitHub using `devtools`:
 
 ```{r github, eval=FALSE}
 devtools::install_github("MalteThodberg/TeMPO")
@@ -49,19 +49,22 @@ TeMPO can calculate the summarized signal (e.g. the average counts-per-millon) a
 - One or more sets of genomic sites as a GRanges or GRangesList.
 - One or more sets of genome-wide signals as a BigWigFile or BigWigFilelist (or RleList or RleListList if the genome is very small and/or the genome-wide signal is very sparse).
 
-TeMPO will output the result in "tidy" format as a tibble, making it easy to further analyze or plot the data using ggplot2 and the tidyverse packages.
+TeMPO will output the result in "tidy" format as a tibble, making it easy to further analyze or plot the data using `r BiocStyle::CRANpkg("ggplot2")` and the `r BiocStyle::CRANpkg("tidyverse")` packages.
 
 ## Example data sets
 
 TeMPO example below use example data for hela cells (hg19) chromosomes 20-22 from the following sources:
 
-- CAGE data from "Nuclear stability and transcriptional directionality separate functionally distinct RNA species" by Andersson et al. preprocessed using the CAGEfightR package.
-- ChIP-Seq and DNase-Seq data from The Roadmap Epigenomics Project (obtained via the AnnotationHub package with IDs: AH32877, AH32879, AH32881, AH32884).
+- CAGE data from "Nuclear stability and transcriptional directionality separate functionally distinct RNA species" by Andersson _et al_ preprocessed using the `r BiocStyle::Biocpkg("CAGEfightR")` package.
+- ChIP-Seq and DNase-Seq data from The Roadmap Epigenomics Project (obtained via the `r BiocStyle::Biocpkg("AnnotationHub")` package with IDs: AH32877, AH32879, AH32881, AH32884).
 
 First, we load the needed packages:
 
 ```{r, message=F, warning=F}
+library(AnnotationHub)
 library(tidyverse)
+
+# Use light ggplot2 theme
 theme_set(theme_light())
 ```
 
@@ -79,47 +82,21 @@ data("CAGE_minus")
 CAGE_plus
 ```
 
-We can obtain epigenetic data for comparison to the CAGE data using the The Roadmap Epigenomics Project. As ChIP-Seq and DNase-signal is not sparse, we will store these signals as BigWigFile-objects rather than load them into memory:
+We can obtain epigenetic data for comparison to the CAGE data using the The Roadmap Epigenomics Project via the `r BiocStyle::Biocpkg("AnnotationHub")` package. As ChIP-Seq and DNase-signal is not sparse, we will store these signals as BigWigFile-objects rather than load them into memory:
 
-```{r}
-# Locate the bigwig files and name them
-bw_files <- system.file("extdata", package="TeMPO") %>% 
-    list.files(full.names=TRUE)
+__NOTE:__ _The first time you run this, it will take several minutes for AnnotationHub to download the file. After that, AnnotationHub will simply fetch the file from cache, as is done here._
 
-names(bw_files) <- bw_files %>%
-    basename() %>%
-    tools::file_path_sans_ext()
-    
-# Save them as a BigWigFileList
-ChIP_Seq <- bw_files %>%
-    lapply(BigWigFile) %>%
-    as("List")
-```
-
-```{r, eval=FALSE}
-# NOTE: The first time you run this, it will take several minutes for AnnotationHub to download the file. After that, AnnotationHub will simply fetch the file from cache, as is done here:__
+```{r, message=F, warning=F}
+# Setup AnnotationHub
 ah <- AnnotationHub()
+
+# Retrive data and save as BigWigFileList
 ChIP_Seq <- list(DNase="AH32877",
      H3K4me1="AH32879",
      H3K4me3="AH32881",
      H3K27ac="AH32884") %>%
     lapply(function(x) ah[[x]]) %>%
     as("List")
-```
-
-```{r, eval=FALSE}
-# Get metadata
-ah <- AnnotationHub()
-meta_data <- ah[c("AH32877", "AH32879", "AH32881", "AH32884")] %>% 
-    mcols
-
-# Make BigWigFileList of URLs and set names
-ChIP_Seq <- meta_data$sourceurl %>%
-    lapply(BigWigFile) %>%
-    as("List")
-
-names(ChIP_Seq) <- str_remove_all(meta_data$title, 
-                                  pattern = "E117-|.fc.signal.bigwig")
 ```
 
 Below are examples of generating metaprofiles for different combinations of input.
@@ -245,7 +222,7 @@ MM2 %>%
 
 ## Parallel Execution
 
-In case multiple genomic signals are provided (Multiple `BigWigFile`-objects in a `BigWigFileList` or multiple `RleList`-objects in an `RleListList`), signals can be analyzed in parallel using the BiocParallel package. TidyMetaProfile uses the default registered backend:
+In case multiple genomic signals are provided (Multiple `BigWigFile`-objects in a `BigWigFileList` or multiple `RleList`-objects in an `RleListList`), signals can be analyzed in parallel using the `r BiocStyle::Biocpkg("BiocParallel")` package. TidyMetaProfile uses the default registered backend:
 
 ```{r eval=FALSE}
 library(BiocParallel)
