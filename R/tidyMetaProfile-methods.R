@@ -89,6 +89,10 @@ setMethod("tidyMetaProfile",
                     sites="GenomicRangesList"),
           function(sites, forward, reverse=NULL, upstream=100, downstream=100,
                    trimLower=0, trimUpper=1, sumFun=matrixStats::colMeans2) {
+
+              # Remove empty elements
+              sites <- remove_empty(sites)
+
               # Loop over elements
               o <- lapply(sites, tidyMetaProfile,
                           forward=forward, reverse=reverse,
@@ -113,6 +117,10 @@ setMethod("tidyMetaProfile",
           function(sites, forward, reverse=NULL,
                    upstream=100, downstream=100,
                    trimLower=0, trimUpper=1, sumFun=matrixStats::colMeans2) {
+
+              # Remove empty elements
+              sites <- remove_empty(sites)
+
               # Loop over elements
               o <- lapply(sites, tidyMetaProfile,
                           forward=forward, reverse=reverse,

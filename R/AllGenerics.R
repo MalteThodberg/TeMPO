@@ -5,7 +5,9 @@ NULL
 
 #' Advanced usage: Import chunks of a genome-wide vector
 #'
-#' Import regions from coverage stored as a BigWigFile or RleList and return a NumericList.
+#' Import regions from coverage stored as a BigWigFile or RleList and return a
+#' NumericList. Regions unkown to the BigWigFile/RleList will be ignored, and it
+#' is ensured the output vectors all have the same length.
 #'
 #' @param signal BigWigFile or RleList: Genomic signal
 #' @param sites GenomicRanges: Regions to be extracted
@@ -22,12 +24,9 @@ NULL
 #'
 #' # Import from a BigWig
 #' \dontrun{
-# # Get DNase data from AnnotationHub
 # library(AnnotationHub)
 # ah <- AnnotationHub()
 # DNase <- ah[["AH32877"]]
-#
-# # Import only parts of the BigWig to conserve memory
 # agnosticImport(signal=DNase, sites=subset(CAGE_clusters, strand=="+"))
 #' }
 setGeneric("agnosticImport", function(signal, sites) {
@@ -67,7 +66,8 @@ setGeneric("quantileTrim",
 
 #' Advanced usage: Meta Profile in wide format
 #'
-#' Calculates the wide-format meta profile, with regions in rows and positions in columns.
+#' Calculates the wide-format meta profile, with regions in rows and positions
+#' in columns.
 #'
 #' @param sites GenomicRanges: Single-bp genomic locations to calculate the
 #'   meta-profile over.
@@ -117,12 +117,12 @@ setGeneric("wideMetaProfile", function(sites, forward, reverse=NULL,
 #'   \item{pos1}{1-based position relative to sites}
 #'   \item{sense}{Summarized signal for each position}
 #' }
-#' Depending on the input, addditional columns might be added
-#' \describe{
-#'   \item{anti}{If reverse is supplied the genome-wide signal is assumed to be stranded, and the output is split into sense/antisense relative to the orientation of sites.}
-#'   \item{sites}{If sites is a GRangesList, indicates the different sets of sites}
-#'   \item{signal}{if forward/reverse is a BigWigFileList or an RleListList, indicates the different genomic signals}
-#' }
+#' Depending on the input, addditional columns might be added \describe{
+#' \item{anti}{If reverse is supplied the genome-wide signal is assumed to be
+#' stranded, and the output is split into sense/antisense relative to the
+#' orientation of sites.} \item{sites}{If sites is a GRangesList, indicates the
+#' different sets of sites} \item{signal}{if forward/reverse is a BigWigFileList
+#' or an RleListList, indicates the different genomic signals} }
 #' @export
 #'
 #' @examples

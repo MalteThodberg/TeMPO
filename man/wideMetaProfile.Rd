@@ -38,7 +38,8 @@ if reverse=NULL a matrix, else a list of two matrices with names
   "sense" and "anti"
 }
 \description{
-Calculates the wide-format meta profile, with regions in rows and positions in columns.
+Calculates the wide-format meta profile, with regions in rows and positions
+in columns.
 }
 \examples{
 data("CAGE_clusters")

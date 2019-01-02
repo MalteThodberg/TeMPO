@@ -22,7 +22,9 @@ agnosticImport(signal, sites)
 NumericList
 }
 \description{
-Import regions from coverage stored as a BigWigFile or RleList and return a NumericList.
+Import regions from coverage stored as a BigWigFile or RleList and return a
+NumericList. Regions unkown to the BigWigFile/RleList will be ignored, and it
+is ensured the output vectors all have the same length.
 }
 \examples{
 data("CAGE_clusters")

@@ -5,11 +5,10 @@ setMethod("wideMetaProfile",
                     sites="GenomicRanges"),
           function(sites, forward, reverse=NULL, upstream=100, downstream=100) {
               # Pre-checks
-              assertthat::assert_that(all(width(sites) == 1),
+              assertthat::assert_that(length(sites) > 0,
+                                      all(width(sites) == 1),
                                       assertthat::is.count(upstream),
                                       assertthat::is.count(downstream))
-
-              stopifnot(all(width(sites) == 1))
 
               # Expand
               sites <- promoters(sites, upstream=upstream,
@@ -41,11 +40,12 @@ setMethod("wideMetaProfile",
                     sites="GenomicRanges"),
           function(sites, forward, reverse=NULL, upstream=100, downstream=100) {
               # Pre-checks
-              assertthat::assert_that(assertthat::are_equal(class(forward),
-                                    class(reverse)),
-                          all(width(sites) == 1),
-                          assertthat::is.count(upstream),
-                          assertthat::is.count(downstream))
+              assertthat::assert_that(length(sites) > 0,
+                                      assertthat::are_equal(class(forward),
+                                                            class(reverse)),
+                                      all(width(sites) == 1),
+                                      assertthat::is.count(upstream),
+                                      assertthat::is.count(downstream))
 
               # Expand and split
               sites <- promoters(sites, upstream=upstream,

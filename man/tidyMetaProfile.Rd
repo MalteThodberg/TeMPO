@@ -74,12 +74,12 @@ A tibble with the following columns
   \item{pos1}{1-based position relative to sites}
   \item{sense}{Summarized signal for each position}
 }
-Depending on the input, addditional columns might be added
-\describe{
-  \item{anti}{If reverse is supplied the genome-wide signal is assumed to be stranded, and the output is split into sense/antisense relative to the orientation of sites.}
-  \item{sites}{If sites is a GRangesList, indicates the different sets of sites}
-  \item{signal}{if forward/reverse is a BigWigFileList or an RleListList, indicates the different genomic signals}
-}
+Depending on the input, addditional columns might be added \describe{
+\item{anti}{If reverse is supplied the genome-wide signal is assumed to be
+stranded, and the output is split into sense/antisense relative to the
+orientation of sites.} \item{sites}{If sites is a GRangesList, indicates the
+different sets of sites} \item{signal}{if forward/reverse is a BigWigFileList
+or an RleListList, indicates the different genomic signals} }
 }
 \description{
 TeMPO: Tidy Meta Profiles
