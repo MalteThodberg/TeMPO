@@ -4,7 +4,7 @@ NULL
 #' @rdname agnosticImport
 #' @export
 setMethod("agnosticImport",
-          signature(signal="BigWigFile", sites="GenomicRanges"),
+          signature(signal = "BigWigFile", sites = "GenomicRanges"),
           function(signal, sites) {
               # Pre-checks
               # Necessary?
@@ -14,17 +14,17 @@ setMethod("agnosticImport",
               sites <- remove_OoB(sites, si)
 
               # Import
-              o <- import.bw(con=signal,
-                            which=sites,
-                            as="NumericList")
+              o <- import.bw(con = signal,
+                             which = sites,
+                             as = "NumericList")
 
               # Check dimensions - add path here?
-              if(length(o) != length(sites)){
+              if (length(o) != length(sites)) {
                   stop("Unknown error: ",
                        "Not all sites were imported from the BigWig") # Path?
               }
 
-              if(dplyr::n_distinct(elementNROWS(o)) > 1){
+              if (dplyr::n_distinct(elementNROWS(o)) > 1) {
                   stop("Unknown error: ",
                        "Sites were not correctly imported from the BigWig")
               }
@@ -39,7 +39,7 @@ setMethod("agnosticImport",
 #' @rdname agnosticImport
 #' @export
 setMethod("agnosticImport",
-          signature(signal="RleList", sites="GenomicRanges"),
+          signature(signal = "RleList", sites = "GenomicRanges"),
           function(signal, sites) {
               # Pre-checks
               # Necessary?
@@ -55,12 +55,12 @@ setMethod("agnosticImport",
               o <- methods::as(o, "NumericList")
 
               # Check dimensions
-              if(length(o) != length(sites)){
+              if (length(o) != length(sites)) {
                   stop("Unknown error: ",
                        "Not all sites were imported from the RleList") # Path?
               }
 
-              if(dplyr::n_distinct(elementNROWS(o)) > 1){
+              if (dplyr::n_distinct(elementNROWS(o)) > 1) {
                   stop("Unknown error: ",
                        "Sites were not correctly imported from the RleList")
               }

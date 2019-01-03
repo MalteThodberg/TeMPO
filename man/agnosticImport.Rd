@@ -35,5 +35,9 @@ agnosticImport(signal=CAGE_plus$WT, sites=subset(CAGE_clusters, strand=="+"))
 
 # Import from a BigWig
 \dontrun{
+library(AnnotationHub)
+ah <- AnnotationHub()
+DNase <- ah[["AH32877"]]
+agnosticImport(signal=DNase, sites=subset(CAGE_clusters, strand=="+"))
 }
 }

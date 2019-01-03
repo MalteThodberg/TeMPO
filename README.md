@@ -3,43 +3,71 @@
 TeMPO
 =====
 
-The goal of TeMPO is to ...
+TeMPO is an R/Bioconductor package for producicing *meta profiles* (also known as *meta genes*, *average profiles* or *average footprints*) over one or more sets of genomic locations and signals. It takes as input various standard Bioconductor S4-classes and outputs simple data.frames for plotting with `ggplot2` or manipulation using the tidyverse.
 
 Installation
 ------------
 
-You can install the released version of TeMPO from [CRAN](https://CRAN.R-project.org) with:
+### From Github
+
+First install the dependencies from Bioconductor:
 
 ``` r
-install.packages("TeMPO")
+BiocManager::install(
+    c("S4Vectors",
+    "GenomicRanges",
+    "rtracklayer"
+    "BiocGenerics",
+    "IRanges",
+    "GenomeInfoDb",
+    "BiocParallel",
+    "BiocStyle",
+    "AnnotationHub")
+)
 ```
 
-Example
--------
-
-This is a basic example which shows you how to solve a common problem:
+Then install TeMPO using `devtools`:
 
 ``` r
-## basic example code
+devtools::install_github("MalteThodberg/TeMPO")
 ```
 
-What is special about using `README.Rmd` instead of just `README.md`? You can include R chunks like so:
+### From Bioconductor
+
+Coming soon...!
+
+Usage
+-----
 
 ``` r
-summary(cars)
-#>      speed           dist       
-#>  Min.   : 4.0   Min.   :  2.00  
-#>  1st Qu.:12.0   1st Qu.: 26.00  
-#>  Median :15.0   Median : 36.00  
-#>  Mean   :15.4   Mean   : 42.98  
-#>  3rd Qu.:19.0   3rd Qu.: 56.00  
-#>  Max.   :25.0   Max.   :120.00
+library(TeMPO)
+library(magrittr)
+library(tidyr)
+library(ggplot2)
+
+data("CAGE_clusters")
+data("CAGE_plus")
+data("CAGE_minus")
+
+# Stranded Meta-profile across enhancers:
+P <- tidyMetaProfile(sites = subset(CAGE_clusters, 
+                                    clusterType=="enhancer"),
+                     forward = CAGE_plus,
+                     reverse = CAGE_minus,
+                     upstream=200,
+                     downstream=200)
+
+# Plot the resulting tibble with ggplot2:
+P %>%
+    gather(key="direction", value="score", sense, anti, factor_key=TRUE) %>%
+    ggplot(aes(x=pos0, y=score, color=direction)) +
+    geom_line(alpha=0.75) +
+    scale_color_brewer("Direction", palette="Set1") +
+    labs(x="Relative position from center", 
+         y="Average Signal") +
+    theme_minimal()
 ```
 
-You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date.
+<img src="man/figures/README-unnamed-chunk-1-1.png" width="100%" />
 
-You can also embed plots, for example:
-
-<img src="man/figures/README-pressure-1.png" width="100%" />
-
-In that case, don't forget to commit and push the resulting figure files, so they display on GitHub!
+See the TeMPO vignette for full documentation!

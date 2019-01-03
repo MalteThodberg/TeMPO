@@ -40,6 +40,7 @@ test_that("Single row on RleList input", {
 test_that("Single row on BigWig input", {
     # Skip if needed
     if(skip_bigwigs){skip("BigWigs not cached")}
+    skip_on_os("windows")
 
     expect_s3_class(tidyMetaProfile(sites=CAGE_clusters[1],
                                     forward=ChIP_Seq$DNase),
@@ -62,6 +63,8 @@ test_that("Removing empty elements of GRangesList on RleList input", {
 test_that("Removing empty elements of GRangesList on BigWig input", {
     # Skip if needed
     if(skip_bigwigs){skip("BigWigs not cached")}
+    skip_on_os("windows")
+
 
     # Gives warnings
     expect_warning(tidyMetaProfile(sites=split(CAGE_clusters,

@@ -14,36 +14,67 @@ knitr::opts_chunk$set(
 ```
 # TeMPO
 
-The goal of TeMPO is to ...
+TeMPO is an R/Bioconductor package for producicing _meta profiles_ (also known as _meta genes_, _average profiles_ or _average footprints_) over one or more sets of genomic locations and signals. It takes as input various standard Bioconductor S4-classes and outputs simple data.frames for plotting with `ggplot2` or manipulation using the tidyverse.
 
 ## Installation
 
-You can install the released version of TeMPO from [CRAN](https://CRAN.R-project.org) with:
+### From Github
+
+First install the dependencies from Bioconductor:
 
 ``` r
-install.packages("TeMPO")
+BiocManager::install(
+    c("S4Vectors",
+    "GenomicRanges",
+    "rtracklayer"
+    "BiocGenerics",
+    "IRanges",
+    "GenomeInfoDb",
+    "BiocParallel",
+    "BiocStyle",
+    "AnnotationHub")
+)
 ```
 
-## Example
+Then install TeMPO using `devtools`:
 
-This is a basic example which shows you how to solve a common problem:
-
-```{r example}
-## basic example code
+``` r
+devtools::install_github("MalteThodberg/TeMPO")
 ```
 
-What is special about using `README.Rmd` instead of just `README.md`? You can include R chunks like so:
+### From Bioconductor
 
-```{r cars}
-summary(cars)
+Coming soon...!
+
+## Usage
+
+```{r, message=F, warning=F}
+library(TeMPO)
+library(magrittr)
+library(tidyr)
+library(ggplot2)
+
+data("CAGE_clusters")
+data("CAGE_plus")
+data("CAGE_minus")
+
+# Stranded Meta-profile across enhancers:
+P <- tidyMetaProfile(sites = subset(CAGE_clusters, 
+                                    clusterType=="enhancer"),
+                     forward = CAGE_plus,
+                     reverse = CAGE_minus,
+                     upstream=200,
+                     downstream=200)
+
+# Plot the resulting tibble with ggplot2:
+P %>%
+    gather(key="direction", value="score", sense, anti, factor_key=TRUE) %>%
+    ggplot(aes(x=pos0, y=score, color=direction)) +
+    geom_line(alpha=0.75) +
+    scale_color_brewer("Direction", palette="Set1") +
+    labs(x="Relative position from center", 
+         y="Average Signal") +
+    theme_minimal()
 ```
 
-You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date.
-
-You can also embed plots, for example:
-
-```{r pressure, echo = FALSE}
-plot(pressure)
-```
-
-In that case, don't forget to commit and push the resulting figure files, so they display on GitHub!
+See the TeMPO vignette for full documentation!

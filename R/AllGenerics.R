@@ -24,10 +24,10 @@ NULL
 #'
 #' # Import from a BigWig
 #' \dontrun{
-# library(AnnotationHub)
-# ah <- AnnotationHub()
-# DNase <- ah[["AH32877"]]
-# agnosticImport(signal=DNase, sites=subset(CAGE_clusters, strand=="+"))
+#' library(AnnotationHub)
+#' ah <- AnnotationHub()
+#' DNase <- ah[["AH32877"]]
+#' agnosticImport(signal=DNase, sites=subset(CAGE_clusters, strand=="+"))
 #' }
 setGeneric("agnosticImport", function(signal, sites) {
     standardGeneric("agnosticImport")
