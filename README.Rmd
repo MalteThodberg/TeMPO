@@ -26,7 +26,7 @@ First install the dependencies from Bioconductor:
 BiocManager::install(
     c("S4Vectors",
     "GenomicRanges",
-    "rtracklayer"
+    "rtracklayer",
     "BiocGenerics",
     "IRanges",
     "GenomeInfoDb",
